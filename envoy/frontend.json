@@ -1,0 +1,66 @@
+{
+  "listeners": [
+    {
+      "address": "tcp://0.0.0.0:8080",
+      "filters": [
+        {
+          "type": "read",
+          "name": "http_connection_manager",
+          "config": {
+            "codec_type": "auto",
+            "stat_prefix": "frontend_http",
+            "route_config": {
+              "virtual_hosts": [
+                {
+                  "name": "backend",
+                  "domains": ["*"],
+                  "routes": [
+                    {
+                      "prefix": "/",
+                      "cluster": "frontend"
+                    }
+                  ]
+                }
+              ]
+            },
+            "filters": [
+              {
+                "type": "both",
+                "name": "health_check",
+                "config": {
+                  "pass_through_mode": true,
+                  "endpoint": "/healthz",
+                  "cache_time_ms": 1000
+                }
+              },
+              {
+                "type": "decoder",
+                "name": "router",
+                "config": {}
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "admin": {
+    "access_log_path": "/dev/null",
+    "address": "tcp://0.0.0.0:8001"
+  },
+  "cluster_manager": {
+    "clusters": [
+      {
+        "name": "frontend",
+        "connect_timeout_ms": 250,
+        "type": "static",
+        "lb_type": "round_robin",
+        "hosts": [
+          {
+            "url": "tcp://127.0.0.1:9090"
+          }
+        ]
+      }
+    ]
+  }
+}
