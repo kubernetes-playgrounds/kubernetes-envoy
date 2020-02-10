@@ -70,11 +70,12 @@ func (s *Server) Stop() {
 }
 
 func healthz(wr http.ResponseWriter, r *http.Request) {
+	fmt.Println("received a healthz request")
 	fmt.Fprintf(wr, "OK\n")
 }
 
 func index(wr http.ResponseWriter, r *http.Request) {
-
+	fmt.Println("received an index request")
 	time.Sleep(time.Duration(rand.Intn(1000)) * time.Microsecond)
 	fmt.Fprintf(wr, "Hello\n")
 }
