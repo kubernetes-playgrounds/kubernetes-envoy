@@ -14,7 +14,7 @@ docker-push:
 	docker push guanw0826/kubernetes-envoy-frontend
 
 docker-run:
-	docker run -d -p 8080:8080 guanw0826/kubernetes-envoy-frontend
+	docker run -d -p 9090:9090 guanw0826/kubernetes-envoy-frontend
 
 kube-configmap:
-	kubectl create configmap frontend --from-file=../envoy/frontend.json
+	kubectl create configmap frontend --from-file=envoy.json=./envoy/frontend.json

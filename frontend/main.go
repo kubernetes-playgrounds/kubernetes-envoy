@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var address = ":8080"
+var address = ":9090"
 
 var rootCmd = &cobra.Command{
 	Use:   "frontend",

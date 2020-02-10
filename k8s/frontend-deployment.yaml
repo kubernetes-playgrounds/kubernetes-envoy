@@ -2,38 +2,44 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  labels:
-    app: frontend
   name: frontend
-  namespace: default
 spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
   template:
     metadata:
       labels:
         app: frontend
-      name: frontend
     spec:
       containers:
         - name: frontend
+          imagePullPolicy: Always
           image: guanw0826/kubernetes-envoy-frontend:latest
-          imagePullPolicy: IfNotPresent
-          command:
-            - "--address=127.0.0.1:9090"
-        - name: envoy
-          image: lyft/envoy:a733fc5932b34c984712c3090ba74fe54b480324
-          command:
-            - "/usr/local/bin/envoy"
-          args:
-            - "--config-path /etc/envoy/envoy.json"
-            - "--mode serve"
-            - "--service-cluster frontend"
-          ports:
-            - containerPort: 8080
-              protocol: TCP
-          volumeMounts:
-            - name: envoy
-              mountPath: /etc/envoy
-      volumes:
-        - name: envoy
-          configMap:
-            name: frontend
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-svc
+spec:
+  selector:
+    app: frontend
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 9090
+      targetPort: 9090
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: frontend-svc-ingress
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /
+            backend:
+              serviceName: frontend-svc
+              servicePort: 9090
