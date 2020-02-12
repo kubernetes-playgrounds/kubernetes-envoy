@@ -25,6 +25,25 @@ spec:
             httpGet:
               path: /healthz
               port: 9090
+        - name: envoy
+          image: envoyproxy/envoy-dev:latest
+          imagePullPolicy: Always
+          command:
+            - "/usr/local/bin/envoy"
+          args:
+            - "--config-path /etc/envoy/envoy.json"
+            - "--mode serve"
+            - "--service-cluster frontend"
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - name: envoy
+              mountPath: /etc/envoy
+      volumes:
+        - name: envoy
+          configMap:
+            name: frontend
 ---
 apiVersion: v1
 kind: Service
@@ -36,8 +55,8 @@ spec:
   type: NodePort
   ports:
     - protocol: TCP
-      port: 9090
-      targetPort: 9090
+      port: 8080
+      targetPort: 8080
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
@@ -50,4 +69,4 @@ spec:
           - path: /
             backend:
               serviceName: frontend-svc
-              servicePort: 9090
+              servicePort: 8080
