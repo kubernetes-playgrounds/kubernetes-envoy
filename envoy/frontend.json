@@ -1,66 +1,87 @@
 {
-  "listeners": [
-    {
-      "address": "tcp://0.0.0.0:8080",
-      "filters": [
-        {
-          "type": "read",
-          "name": "http_connection_manager",
-          "config": {
-            "codec_type": "auto",
-            "stat_prefix": "frontend_http",
-            "route_config": {
-              "virtual_hosts": [
-                {
-                  "name": "backend",
-                  "domains": ["*"],
-                  "routes": [
+  "static_resources": {
+    "listeners": [
+      {
+        "address": {
+          "socket_address": {
+            "address": "0.0.0.0",
+            "port_value": 8080,
+            "protocol": "tcp"
+          }
+        },
+        "filter_chains": {
+          "filters": [
+            {
+              "name": "envoy.http_connection_manager",
+              "config": {
+                "stat_prefix": "frontend_http",
+                "http_filters": [
+                  {
+                    "name": "envoy.router",
+                    "config": {}
+                  }
+                ],
+                "route_config": {
+                  "virtual_hosts": [
                     {
-                      "prefix": "/",
-                      "cluster": "frontend"
+                      "name": "frontend",
+                      "domains": "*",
+                      "routes": [
+                        {
+                          "route": {
+                            "cluster": "frontend"
+                          },
+                          "match": {
+                            "prefix": "/"
+                          }
+                        }
+                      ]
                     }
                   ]
                 }
-              ]
-            },
-            "filters": [
-              {
-                "type": "both",
-                "name": "health_check",
-                "config": {
-                  "pass_through_mode": true,
-                  "endpoint": "/healthz",
-                  "cache_time_ms": 1000
-                }
-              },
-              {
-                "type": "decoder",
-                "name": "router",
-                "config": {}
               }
-            ]
-          }
+            }
+          ]
         }
-      ]
-    }
-  ],
-  "admin": {
-    "access_log_path": "/dev/null",
-    "address": "tcp://0.0.0.0:8001"
-  },
-  "cluster_manager": {
+      }
+    ],
     "clusters": [
       {
         "name": "frontend",
-        "connect_timeout_ms": 250,
-        "type": "static",
-        "lb_type": "round_robin",
-        "hosts": [
-          {
-            "url": "tcp://127.0.0.1:9090"
-          }
-        ]
+        "connect_timeout": "1s",
+        "type": "STATIC",
+        "lb_policy": "ROUND_ROBIN",
+        "http_protocol_options": {},
+        "load_assignment": {
+          "cluster_name": "frontend",
+          "endpoints": [
+            {
+              "lb_endpoints": [
+                {
+                  "endpoint": {
+                    "address": {
+                      "socket_address": {
+                        "protocol": "tcp",
+                        "address": "0.0.0.0",
+                        "port_value": 9090
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
       }
     ]
+  },
+  "admin": {
+    "access_log_path": "/dev/null",
+    "address": {
+      "socket_address": {
+        "address": "0.0.0.0",
+        "port_value": 8001
+      }
+    }
   }
 }
