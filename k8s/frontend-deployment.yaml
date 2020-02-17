@@ -17,14 +17,6 @@ spec:
         - name: frontend
           imagePullPolicy: Always
           image: guanw0826/kubernetes-envoy-frontend:latest
-          livenessProbe:
-            httpGet:
-              path: /healthz
-              port: 9090
-          readinessProbe:
-            httpGet:
-              path: /healthz
-              port: 9090
         - name: envoy
           image: envoyproxy/envoy-dev:latest
           imagePullPolicy: Always
